@@ -1,3 +1,14 @@
 # Runtime Compiler Assistent
 
-For now, just use the example binary from cpu_features.
+Currently, RCA extracts 1) CPU features 2) target triple through set environment variable.
+
+Compile RCA
+```
+$ mkdir build; cd build; cmake ../ && make
+```
+
+Setting Target Triple ENV
+```
+$ export TARGET_TRIPLE=$(gcc -dumpmachine)
+```
+
