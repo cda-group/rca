@@ -140,37 +140,37 @@ DEFINE_PRINT_FLAGS(GetPPCFeaturesEnumValue, GetPPCFeaturesEnumName, PPCFeatures,
  * environment variable through gcc -dumpmachine
  */
 char* get_target_triple() {
-    char *triple = getenv("TARGET_TRIPLE");
-    if (triple)
-        return triple;
-    else
-        return "unknown";
+  char *triple = getenv("TARGET_TRIPLE");
+  if (triple)
+      return triple;
+  else
+      return "unknown";
 }
 
 void generate_compiler_info(const Printer printer) {
-    char *triple = get_target_triple();
+  char *triple = get_target_triple();
 #if defined(CPU_FEATURES_ARCH_X86)
-    const X86Info info = GetX86Info();
-    char brand_string[49];
-    FillX86BrandString(brand_string);
-    PrintS(printer, "triple", triple);
-	PrintS(printer, "arch", "x86");
-    PrintS(printer, "uarch", GetX86MicroarchitectureName(GetX86Microarchitecture(&info)));
-	PrintS(printer, "brand", brand_string);
-    PrintFlags(printer, &info.features);
+  const X86Info info = GetX86Info();
+  char brand_string[49];
+  FillX86BrandString(brand_string);
+  PrintS(printer, "triple", triple);
+  PrintS(printer, "arch", "x86");
+  PrintS(printer, "uarch", GetX86MicroarchitectureName(GetX86Microarchitecture(&info)));
+  PrintS(printer, "brand", brand_string);
+  PrintFlags(printer, &info.features);
 #elif defined(CPU_FEATURES_ARCH_ARM)
-    // Just X86 for now..
+  // Just X86 for now..
 #endif
 
 }
 
 int main() {
-	Printer printer = getJsonPrinter();
-	printer.Start();
-	generate_compiler_info(printer);
-	printer.End();
-    PrintLineFeed();
-    return EXIT_SUCCESS;
+  Printer printer = getJsonPrinter();
+  printer.Start();
+  generate_compiler_info(printer);
+  printer.End();
+  PrintLineFeed();
+  return EXIT_SUCCESS;
 }
 
 
