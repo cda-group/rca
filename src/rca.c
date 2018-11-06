@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/utsname.h>
 
 #include "cpu_features_macros.h"
 #include "cpuinfo_aarch64.h"
@@ -135,42 +136,72 @@ DEFINE_PRINT_FLAGS(GetPPCFeaturesEnumValue, GetPPCFeaturesEnumName, PPCFeatures,
 #endif
 
 
-/**
- * Fetches target triple that has been set externally as 
- * environment variable through gcc -dumpmachine
- */
-char* get_target_triple() {
-  char *triple = getenv("TARGET_TRIPLE");
-  if (triple)
-      return triple;
-  else
-      return "unknown";
+// Load Target Triple into array
+// Ignores vendor (i.e., pc), example output x86_64-linux-gnu
+// Note: input triple must be deallocated after use!
+void load_target_triple(char **triple) {
+  char *res = malloc(49);
+  struct utsname buffer;
+  if (uname(&buffer) != 0) {
+    char *unknown = "unknown";
+    snprintf(res, strlen(unknown) + 1 , "%s\n", "unknown");
+  } else {
+    char *lgnu = "linux-gnu";
+    size_t len = strlen(lgnu) + strlen(buffer.machine) + 2;  // 1+ space, 1+ null term
+    snprintf(res, len, "%s-%s\n", buffer.machine, lgnu);
+  }
+  *triple = res;
+}
+
+void load_kernel_info(char **kernel) {
+  char *res = malloc(49);
+  struct utsname buffer;
+  if (uname(&buffer) != 0) {
+    char *unknown = "unknown";
+    snprintf(res, strlen(unknown) + 1 , "%s\n", "unknown");
+  } else {
+    size_t len = strlen(buffer.release) + 1;  // 1+ null term
+    snprintf(res, len, "%s\n", buffer.release);
+  }
+  *kernel = res;
 }
 
 void generate_compiler_info(const Printer printer) {
-  char *triple = get_target_triple();
+  char *triple;
+  load_target_triple(&triple);
+  char *kernel;
+  load_kernel_info(&kernel);
+
 #if defined(CPU_FEATURES_ARCH_X86)
   const X86Info info = GetX86Info();
   char brand_string[49];
   FillX86BrandString(brand_string);
-  PrintS(printer, "triple", triple);
   PrintS(printer, "arch", "x86");
+  PrintS(printer, "triple", triple);
+  PrintS(printer, "kernel", kernel);
   PrintS(printer, "uarch", GetX86MicroarchitectureName(GetX86Microarchitecture(&info)));
   PrintS(printer, "brand", brand_string);
   PrintFlags(printer, &info.features);
 #elif defined(CPU_FEATURES_ARCH_ARM)
-  // Just X86 for now..
+  // Only X86 for now
 #endif
 
+  // Deallocate malloced mem
+  free(triple);
+  free(kernel);
 }
 
 int main() {
+#if defined(__linux__)
   Printer printer = getJsonPrinter();
   printer.Start();
   generate_compiler_info(printer);
   printer.End();
   PrintLineFeed();
   return EXIT_SUCCESS;
+#endif
+  printf("%s\n", "RCA is only supported by Linux");
+  return EXIT_FAILURE;
 }
 
 
