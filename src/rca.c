@@ -2,7 +2,22 @@
 // Gathers machine information to be sent to the runtime
 // in order for remote cross compilation to happen.
 // ---------------------------------------------
-// JSON logic extracted from the cpu_features example (APACHE V2 LICENSE)
+// JSON logic extracted from the cpu_features example (Apache V2 LICENSE)
+
+// Copyright 2017 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -144,7 +159,7 @@ void load_target_triple(char **triple) {
   struct utsname buffer;
   if (uname(&buffer) != 0) {
     char *unknown = "unknown";
-    snprintf(res, strlen(unknown) + 1 , "%s\n", "unknown");
+    snprintf(res, strlen(unknown) + 1 , "%s\n", unknown);
   } else {
     char *lgnu = "linux-gnu";
     size_t len = strlen(lgnu) + strlen(buffer.machine) + 2;  // 1+ space, 1+ null term
@@ -153,12 +168,15 @@ void load_target_triple(char **triple) {
   *triple = res;
 }
 
+// Load Linux Kernel Release into array
+// e.g., 4.15.0-041500-generic
+// Note: input **kernel must be deallocated after use!
 void load_kernel_info(char **kernel) {
   char *res = malloc(49);
   struct utsname buffer;
   if (uname(&buffer) != 0) {
     char *unknown = "unknown";
-    snprintf(res, strlen(unknown) + 1 , "%s\n", "unknown");
+    snprintf(res, strlen(unknown) + 1 , "%s\n", unknown);
   } else {
     size_t len = strlen(buffer.release) + 1;  // 1+ null term
     snprintf(res, len, "%s\n", buffer.release);
