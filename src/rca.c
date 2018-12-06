@@ -95,3 +95,14 @@ const char* cpu_arch() {
     return "aarch64";
 #endif
 }
+
+const char* sub_arch() {
+#if defined(CPU_FEATURES_ARCH_X86)
+    const X86Info info = GetX86Info();
+    return GetX86MicroarchitectureName(GetX86Microarchitecture(&info));
+#elif defined(CPU_FEATURES_ARCH_ARM)
+    return "";
+#elif defined(CPU_FEATURES_ARCH_AARCH64)
+    return "";
+#endif
+}

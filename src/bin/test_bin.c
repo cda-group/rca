@@ -14,5 +14,6 @@ int main() {
     printf("Enabled CPU Features: %s\n", features);
 
     printf("CPU Arch: %s\n", cpu_arch());
+    printf("Sub Arch: %s\n", sub_arch());
     return 0;
 }
